@@ -1,1 +1,1 @@
-![Alt Text](./AnimatedSearchBarUI.gif)
+![Alt Text](AnimatedSearchBarUI.gif)
