@@ -1,86 +1,140 @@
-import React from 'react';
-import type {Node} from 'react';
+import React, {Component} from 'react';
 import {
   SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  TextInput,
+  FlatList,
+  Keyboard,
+  Platform,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Icon} from 'react-native-elements';
+import * as Animatable from 'react-native-animatable';
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+const listItems = [
+  'Development',
+  'Business',
+  ' IT & Software',
+  'Office Productivity',
+  'Personal Development',
+  'Design',
+  'Marketing',
+  'LifeStyle',
+  'Photography',
+  'Health & Firness',
+  'Teacher Training',
+  'Music',
+];
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+class App extends Component {
+  state = {searchBarFocused: false};
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  componentDidMount() {
+    this.keyboardDidShow = Keyboard.addListener(
+      'keyboardDidShow',
+      this.keyboardDidShow,
+    );
+    this.keyboardWillShow = Keyboard.addListener(
+      'keyboardWillShow',
+      this.keyboardWillShow,
+    );
+    this.keyboardWillHide = Keyboard.addListener(
+      'keyboardWillHide',
+      this.keyboardWillHide,
+    );
+  }
+
+  keyboardDidShow = () => {
+    if (Platform.OS === 'android') this.setState({searchBarFocused: true});
   };
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
+  keyboardWillShow = () => {
+    if (Platform.OS === 'ios') this.setState({searchBarFocused: true});
+  };
+
+  keyboardWillHide = () => {
+    this.setState({searchBarFocused: false});
+  };
+
+  render() {
+    let textInputRef;
+
+    return (
+      <SafeAreaView style={{flex: 1}}>
         <View
           style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            height: 80,
+            backgroundColor: '#c45653',
+            justifyContent: 'center',
+            paddingHorizontal: 5,
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+          <Animatable.View
+            animation={'slideInRight'}
+            duration={500}
+            style={{
+              height: 50,
+              backgroundColor: 'white',
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingLeft: 5,
+              flexDirection: 'row',
+              borderRadius: 20,
+            }}>
+            <Animatable.View
+              animation={
+                this.state.searchBarFocused ? 'fadeInLeft' : 'fadeInRight'
+              }
+              duration={400}>
+              <Icon
+                name={this.state.searchBarFocused ? 'arrow-back' : 'search'}
+                type="ionicon"
+                fontSize={24}
+                onPress={() => {
+                  this.state.searchBarFocused
+                    ? (() => {
+                        Keyboard.dismiss();
+                      })()
+                    : (() => {
+                        textInputRef.focus();
+                        this.setState({searchBarFocused: true});
+                      })();
+                }}
+              />
+            </Animatable.View>
+            <TextInput
+              ref={ref => {
+                textInputRef = ref;
+              }}
+              style={{
+                flex: 1,
+                height: 50,
+                borderRadius: 20,
+                paddingLeft: 10,
+              }}
+              placeholder={'Search'}
+            />
+          </Animatable.View>
         </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+
+        <FlatList
+          style={{
+            backgroundColor: this.state.searchBarFocused
+              ? 'rgba(0,0,0,0.3)'
+              : 'white',
+          }}
+          data={listItems}
+          renderItem={({item}) => (
+            <Text style={{padding: 20, fontSize: 20}}>{item}</Text>
+          )}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      </SafeAreaView>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   sectionContainer: {
